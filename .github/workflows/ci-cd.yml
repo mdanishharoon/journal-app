@@ -10,6 +10,9 @@ env:
   DOCKER_IMAGE: 22i0955/journal-api
   DOCKER_TAG: ${{ github.sha }}
 
+permissions:
+  contents: write 
+  
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
