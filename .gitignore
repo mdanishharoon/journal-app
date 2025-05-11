@@ -33,6 +33,8 @@ env/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # Database
 *.db
@@ -43,4 +45,54 @@ env/
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+k3s.yaml
+.kube/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+.terraformrc
+terraform.rc
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# AWS
+.aws/
+aws.json
+*.pem
+*.ppk
+
+# Ansible
+*.retry
+ansible.cfg
+inventory.ini
+
+# ArgoCD
+argocd-cm.yaml
+argocd-rbac-cm.yaml
+argocd-secret.yaml
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Local development
+local_settings.py
+local.py
+local_*.py 

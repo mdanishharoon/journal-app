@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: journal-api
+  namespace: journal-app
+  labels:
+    app: journal-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: journal-api
+  template:
+    metadata:
+      labels:
+        app: journal-api
+    spec:
+      containers:
+      - name: journal-api
+        image: 22i0955/journal-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: journal-secrets
+              key: database-url
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: journal-secrets
+              key: secret-key
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /api/v1/entries
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/v1/entries
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 20 
