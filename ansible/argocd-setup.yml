@@ -1,0 +1,67 @@
+---
+- name: Setup MicroK8s and ArgoCD
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - apt-transport-https
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Install MicroK8s
+      shell: |
+        snap install microk8s --classic
+        usermod -a -G microk8s ubuntu
+        chown -f -R ubuntu ~/.kube
+      args:
+        creates: /snap/bin/microk8s
+
+    - name: Enable required MicroK8s addons
+      shell: |
+        microk8s enable dns
+        microk8s enable storage
+        microk8s enable ingress
+      args:
+        creates: /var/snap/microk8s/current/args/dns
+
+    - name: Create kubectl alias
+      shell: |
+        echo 'alias kubectl="microk8s kubectl"' >> /home/ubuntu/.bashrc
+        source /home/ubuntu/.bashrc
+
+    - name: Install ArgoCD
+      shell: |
+        microk8s kubectl create namespace argocd
+        microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      args:
+        creates: /var/snap/microk8s/current/args/argocd
+
+    - name: Wait for ArgoCD to be ready
+      shell: microk8s kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
+      register: result
+      retries: 10
+      delay: 30
+      until: result.rc == 0
+
+    - name: Get ArgoCD admin password
+      shell: microk8s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+      register: argocd_password
+      no_log: true
+
+    - name: Create ArgoCD application
+      shell: |
+        microk8s kubectl port-forward svc/argocd-server -n argocd 8080:443 &
+        sleep 5
+        argocd login localhost:8080 --username admin --password {{ argocd_password.stdout }} --insecure
+        argocd app create journal-app \
+          --repo https://github.com/your-username/journal-app.git \
+          --path k8s \
+          --dest-server https://kubernetes.default.svc \
+          --dest-namespace default
+      args:
+        creates: /tmp/argocd-app-created 
