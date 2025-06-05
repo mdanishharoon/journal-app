@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: journal-api
-        image: 22i0955/journal-api:80ff3e5d8e93191664a3f80c473b96afd1021f06
+        image: 22i0955/journal-api:d8e0c9a21e7f5c6abd8c947dbcf69ea2820f0769
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
