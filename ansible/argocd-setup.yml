@@ -59,7 +59,7 @@
         sleep 5
         argocd login localhost:8080 --username admin --password {{ argocd_password.stdout }} --insecure
         argocd app create journal-app \
-          --repo https://github.com/your-username/journal-app.git \
+          --repo https://github.com/mdanishharoon/journal-app.git \
           --path k8s \
           --dest-server https://kubernetes.default.svc \
           --dest-namespace default
